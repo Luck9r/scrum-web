@@ -1,9 +1,10 @@
 import React from "react";
 import Task from "@/ui/Task";
+import Link from "next/link";
 
 
-const fetchCardData = (slug: string) => {
-    // const response = await fetch(`https://api.example.com/tasks/${slug}`);
+const fetchCardData = async (slug: string) => {
+    // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${slug}`);
     // if (!response.ok) {
     //     throw new Error("Failed to fetch task");
     // }
@@ -16,15 +17,17 @@ const fetchCardData = (slug: string) => {
         status: "Task Status",
         dueDate: "Task Due Date",
         priority: "Task Priority",
+        boardId: "1",
     };
 };
 
 const TaskPage = async ({params,}: { params: Promise<{ slug: string }> }) => {
     const slug = (await params).slug;
-    const task = fetchCardData(slug);
+    const task = await fetchCardData(slug);
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-base-200">
+        <div className="flex flex-col justify-center items-center min-h-screen space-y-4">
+            <Link className="btn btn-primary" href={"/boards/"+task.boardId}>Go to Board</Link>
             <Task
                 title={task.title}
                 content={task.content}

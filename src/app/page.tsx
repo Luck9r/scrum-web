@@ -1,13 +1,25 @@
+'use client'
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/auth';
 
+const Home = () => {
+    const { user } = useAuth({middleware: 'guest'});
+    const router = useRouter();
 
-export default function Home() {
+    useEffect(() => {
+        if (user) {
+            router.push('/dashboard');
+        } else {
+            router.push('/login');
+        }
+    }, [user, router]);
+
     return (
-        <div className="bg-base-100 h-screen">
-            <main className="p-10">
-
-            </main>
-            <footer className="">
-            </footer>
+        <div className="flex items-center justify-center h-screen">
+            <h1 className="text-4xl text-primary">Redirecting...</h1>
         </div>
     );
-}
+};
+
+export default Home;

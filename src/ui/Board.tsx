@@ -1,12 +1,12 @@
 import React from "react";
 import Card from "@/ui/Card";
-import {CardData} from "@/interfaces/CardData";
+import {TaskData} from "@/interfaces/TaskData";
 import Link from "next/link";
 
 interface BoardProps {
     id: string;
     statuses: string[];
-    cards: CardData[];
+    cards: TaskData[];
 }
 
 const Board: React.FC<BoardProps> = ({id, statuses, cards}) => {
@@ -14,7 +14,7 @@ const Board: React.FC<BoardProps> = ({id, statuses, cards}) => {
     return (
         <div className="flex space-x-4">
             {statuses.map((status) => (
-                <div key={status} className="card bg-base-100">
+                <div key={status} className="card bg-base-300">
                     <div className="card-body">
                         <h2 className="card-title text-base-content">{status}</h2>
                         <div className="items-center">
@@ -25,8 +25,10 @@ const Board: React.FC<BoardProps> = ({id, statuses, cards}) => {
                                         <Card
                                             title={card.title}
                                             slug={card.slug}
-                                        >
-                                            <p>{card.content}</p>
+                                            boardId={card.boardId}
+                                            dueDate={card.dueDate}
+                                            content={card.content}
+                                            status={card.status}>
                                         </Card>
                                     </Link>
                                 ))}
