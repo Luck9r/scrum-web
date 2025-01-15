@@ -1,26 +1,60 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/auth';
+import axios from '@/lib/axios';
 
 const Dashboard = () => {
     const { user } = useAuth({ middleware: 'auth' });
+    const [boards, setBoards] = useState([]);
+
+    const fetchBoards = async () => {
+        try {
+            const response = await axios.get('/api/boards');
+            if (Array.isArray(response.data)) {
+
+                setBoards(response.data);
+            } else {
+                console.error('Error: Expected an array of boards');
+            }
+        } catch (error) {
+            console.error('Error fetching boards:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchBoards().then(() => {});
+    }, []);
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-semibold mb-4">Dashboard</h1>
-            <div className="mb-6">
-                <h2 className="text-2xl font-semibold">User Information</h2>
-                <p><strong>Name:</strong> {user?.name}</p>
-                <p><strong>Email:</strong> {user?.email}</p>
-            </div>
-            <div>
-                <h2 className="text-2xl font-semibold mb-2">Boards</h2>
-                <ul className="list-disc list-inside">
-                    <li><Link href="/boards/1" className="text-primary">Board 1</Link></li>
-                    <li><Link href="/boards/2" className="text-primary">Board 2</Link></li>
-                    <li><Link href="/boards/3" className="text-primary">Board 3</Link></li>
-                </ul>
+        <div className="card bg-base-300 w-96 shadow-xl mt-10">
+            <div className="card-body">
+                <h2 className="card-title text-3xl font-semibold mb-4">Dashboard</h2>
+                <div className="mb-6">
+                    <h3 className="text-2xl font-semibold">User Information</h3>
+                    <p><strong>Name:</strong> {user?.name}</p>
+                    <p><strong>Email:</strong> {user?.email}</p>
+                    <p>
+                        <strong>Email Verified:</strong> {user?.email_verified_at ? 'Yes' : 'No, check your inbox.'}
+                        {!user?.email_verified_at && (
+                            <Link href="/verify-email" className="text-primary ml-2">
+                                Verify Email
+                            </Link>
+                        )}
+                    </p>
+                </div>
+                <div>
+                    <h3 className="text-2xl font-semibold mb-2">Boards</h3>
+                    <ul className="list-disc list-inside">
+                        {boards.map((board) => (
+                            <li key={board.id}>
+                                <Link href={`/boards/${board.id}`} className="text-primary">
+                                    {board.title}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
     );

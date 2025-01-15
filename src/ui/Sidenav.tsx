@@ -3,17 +3,17 @@ import Link from "next/link";
 import React from "react";
 
 interface SidenavProps {
-    //eslint-disable-next-line
-    user: any;
+    user: any; //eslint-disable-line
     logout: () => Promise<void>;
 };
 
 const Sidenav = ({user, logout}: SidenavProps) => {
     const name = user?.name;
-    console.log(user)
+    const isAdmin = user?.role === 'admin';
+
     return (
         <div className="p-4">
-            <h2 className="text-xl font-bold text-center pb-5">Navigation</h2>
+            <h2 className="text-xl font-bold text-center pb-5">Scrum helper</h2>
             <div className="text-center pb-5">
                 <p>Welcome, {name}</p>
                 <button onClick={logout} className="btn btn-sm">Logout</button>
@@ -34,6 +34,13 @@ const Sidenav = ({user, logout}: SidenavProps) => {
                         <div className="">Settings</div>
                     </Link>
                 </li>
+                {isAdmin && (
+                    <li>
+                        <Link href="/management">
+                            <div className="">Management</div>
+                        </Link>
+                    </li>
+                )}
             </ul>
         </div>
     );

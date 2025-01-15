@@ -1,42 +1,59 @@
-// src/app/tasks/page.tsx
-import React from "react";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import axios from '@/lib/axios';
 import Card from "@/ui/Card";
 import { TaskData } from "@/interfaces/TaskData";
 import Link from "next/link";
 
-const fetchTasks = async (): Promise<TaskData[]> => {
-    // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`);
-    // if (!response.ok) {
-    //     throw new Error("Failed to fetch tasks");
-    // }
-    // const data = await response.json();
-    // return data.tasks;
-
-    // Mock data for demonstration purposes
-    return [
-        {
-            slug: "task-1",
-            title: "Task 1",
-            content: "Content for task 1",
-            status: "In Progress",
-            dueDate: "2023-12-31",
-            priority: "High",
-            boardId: "1"
-        },
-        {
-            slug: "task-2",
-            title: "Task 2",
-            content: "Content for task 2",
-            status: "Completed",
-            dueDate: "2023-11-30",
-            priority: "Medium",
-            boardId: "2"
-        }
-    ];
+const fetchTasks = (): Promise<TaskData[]> => {
+    return axios.get(`/api/tasks`)
+        .then(response => {
+            const tasks = response.data.map((task: any) => {
+                const taskData: TaskData = {
+                    id: task.id,
+                    slug: task.slug,
+                    title: task.title,
+                    content: task.content,
+                    status: task.status_id,
+                    dueDate: task.due_date,
+                    boardId: task.board_id
+                };
+                console.log(taskData);
+                return taskData;
+            });
+            return tasks;
+        })
+        .catch(error => {
+            console.log(error);
+            throw new Error("Failed to fetch tasks");
+        });
 };
 
-const TasksPage = async () => {
-    const tasks = await fetchTasks();
+const TasksPage = () => {
+    const [tasks, setTasks] = useState<TaskData[]>([]);
+    const [boardTitles, setBoardTitles] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        fetchTasks().then(setTasks).catch(console.error);
+    }, []);
+
+    useEffect(() => {
+        const boardIds = Array.from(new Set(tasks.map(task => task.boardId)));
+        boardIds.forEach(boardId => {
+            axios.get(`/api/board/${boardId}`)
+                .then(response => {
+                    setBoardTitles(prevTitles => ({
+                        ...prevTitles,
+                        [boardId]: response.data.title
+                    }));
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        });
+    }, [tasks]);
+
     const groupedTasks = tasks.reduce((groupedTasks, task) => {
         if (!groupedTasks[task.boardId]) {
             groupedTasks[task.boardId] = [];
@@ -50,7 +67,7 @@ const TasksPage = async () => {
             {Object.entries(groupedTasks).map(([boardId, tasks]) => (
                 <div key={boardId} className="card bg-base-300">
                     <div className="card-body">
-                        <h2 className="card-title text-base-content">Board {boardId}</h2>
+                        <h2 className="card-title text-base-content">{boardTitles[boardId] || `Board ${boardId}`}</h2>
                         <div className="items-center">
                             {tasks.map((task) => (
                                 <Link key={task.slug} href={"/task/" + task.slug}>

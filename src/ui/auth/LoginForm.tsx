@@ -13,7 +13,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(false);
     const [status, setStatus] = useState<string>('');
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ email?: string; password?: string; message?: string}>({});
 
     useEffect(() => {
         const resetToken = searchParams.get('reset');
@@ -27,6 +27,8 @@ const LoginForm = () => {
         } catch (error: Error | AxiosError | unknown) {
             if (axios.isAxiosError(error) && error.response?.status === 422) {
                 setErrors(error.response?.data?.errors);
+            } else if (axios.isAxiosError(error) && error.response?.data?.message) {
+                setErrors({email: error.response?.data?.message});
             }
         } finally {
             setStatus('');
@@ -51,7 +53,7 @@ const LoginForm = () => {
                             d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
                     </svg>
                     <input
-                        type="text"
+                        type="email "
                         className="grow"
                         placeholder="Email"
                         value={email}

@@ -6,7 +6,7 @@ import axios, { AxiosError } from 'axios';
 import { useAuth } from '@/hooks/auth';
 
 const RegisterForm = () => {
-    const { register } = useAuth({ middleware: 'guest' });
+    const { register } = useAuth({ middleware: 'guest', redirectIfAuthenticated: '/dashboard'});
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -23,6 +23,8 @@ const RegisterForm = () => {
             setStatus('');
             if (axios.isAxiosError(error) && error.response?.status === 422) {
                 setErrors(error.response?.data?.errors);
+            } else if (axios.isAxiosError(error) && error.response?.data.message) {
+                setErrors({ name: error.response?.data?.message });
             }
         }
     };

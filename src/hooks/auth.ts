@@ -43,6 +43,7 @@ export const useAuth = ({
 
             await axios.post(`/register`, data)
             await mutate()
+            await resendEmailVerification()
         } catch (error) {
             throw error
         }
