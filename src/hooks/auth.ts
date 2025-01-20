@@ -124,9 +124,11 @@ export const useAuth = ({
         }
         if (middleware === 'auth' && error) logout()
     }, [user, error, middleware, redirectIfAuthenticated])
+    const role = user?.role?.name;
 
     return {
         user,
+        role,
         register,
         login,
         forgotPassword,

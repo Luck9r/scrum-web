@@ -9,7 +9,7 @@ interface SidenavProps {
 
 const Sidenav = ({user, logout}: SidenavProps) => {
     const name = user?.name;
-    const isAdmin = user?.role === 'admin';
+    const isAdmin = user?.roles.some((role: any) => role.name === 'admin');
 
     return (
         <div className="p-4">

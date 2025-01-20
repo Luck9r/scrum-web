@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import Link from 'next/link';
+import withRole from "@/components/withRole";
 
 const ManagementPanel = () => {
     const [boards, setBoards] = useState([]);
@@ -196,4 +197,6 @@ const ManagementPanel = () => {
     );
 };
 
-export default ManagementPanel;
+const ProtectedManagementPanel = withRole(ManagementPanel, ['admin']);
+
+export default ProtectedManagementPanel;
