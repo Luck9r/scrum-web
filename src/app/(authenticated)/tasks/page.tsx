@@ -1,33 +1,33 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from '@/lib/axios';
 import Card from "@/ui/Card";
-import { TaskData } from "@/interfaces/TaskData";
+import {TaskData} from "@/interfaces/TaskData";
 import Link from "next/link";
 
-const fetchTasks = (): Promise<TaskData[]> => {
-    return axios.get(`/api/tasks`)
-        .then(response => {
-            const tasks = response.data.map((task: any) => {
-                const taskData: TaskData = {
-                    id: task.id,
-                    slug: task.slug,
-                    title: task.title,
-                    content: task.content,
-                    status: task.status_id,
-                    dueDate: task.due_date,
-                    boardId: task.board_id
-                };
-                console.log(taskData);
-                return taskData;
-            });
-            return tasks;
-        })
-        .catch(error => {
-            console.log(error);
-            throw new Error("Failed to fetch tasks");
+const fetchTasks = async (): Promise<TaskData[]> => {
+    try {
+        const response = await axios.get(`/api/tasks`);
+        return response.data.map((task: any) => {
+            const taskData: TaskData = {
+                creatorId: task.creator_id,
+                creatorName: task.creator_name,
+                statusId: task.status_id,
+                id: task.id,
+                slug: task.slug,
+                title: task.title,
+                content: task.content,
+                status: task.status_id,
+                dueDate: task.due_date,
+                boardId: task.board_id
+            };
+            return taskData;
         });
+    } catch (error) {
+        console.log(error);
+        throw new Error("Failed to fetch tasks");
+    }
 };
 
 const TasksPage = () => {
@@ -73,12 +73,7 @@ const TasksPage = () => {
                                 <Link key={task.slug} href={"/task/" + task.slug}>
                                     <Card
                                         key={task.slug}
-                                        title={task.title}
-                                        slug={task.slug}
-                                        boardId={task.boardId}
-                                        dueDate={task.dueDate}
-                                        content={task.content}
-                                        status={task.status}
+                                        task={task}
                                     />
                                 </Link>
                             ))}

@@ -3,9 +3,9 @@ import Link from "next/link";
 import React from "react";
 
 interface SidenavProps {
-    user: any; //eslint-disable-line
+    user: any;
     logout: () => Promise<void>;
-};
+}
 
 const Sidenav = ({user, logout}: SidenavProps) => {
     const name = user?.name;
@@ -27,11 +27,6 @@ const Sidenav = ({user, logout}: SidenavProps) => {
                 <li>
                     <Link href="/tasks">
                         <div className="">Tasks</div>
-                    </Link>
-                </li>
-                <li>
-                    <Link href="/settings">
-                        <div className="">Settings</div>
                     </Link>
                 </li>
                 {isAdmin && (
