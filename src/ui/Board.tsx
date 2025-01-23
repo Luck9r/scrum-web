@@ -6,7 +6,7 @@ import Link from "next/link";
 interface BoardProps {
     id: string | Array<string> | undefined;
     statuses: string[];
-    tasks: TaskData[];
+    tasks: TaskData[] | undefined;
     name: string;
 }
 
@@ -21,7 +21,7 @@ const Board: React.FC<BoardProps> = ({statuses, name, tasks}) => {
                         <div className="card-body">
                             <h2 className="card-title text-base-content">{status}</h2>
                             <div className="items-center">
-                                {tasks
+                                {tasks && tasks
                                     .filter((task) => task.status === status)
                                     .map((task) => (
                                         <Link key={task.slug} href={"/task/" + task.slug}>

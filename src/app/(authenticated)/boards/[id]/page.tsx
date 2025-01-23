@@ -1,10 +1,11 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import Board from "@/ui/Board";
-import {TaskData} from "@/interfaces/TaskData";
-import {useParams} from "next/navigation";
+import { TaskData } from "@/interfaces/TaskData";
+import { BoardData } from "@/interfaces/BoardData";
+import { useParams } from "next/navigation";
 
 const fetchStatuses = async (id: string | Array<string> | undefined): Promise<string[]> => {
     try {
@@ -34,32 +35,39 @@ const fetchTasks = async (id: string | Array<string> | undefined): Promise<TaskD
     }
 };
 
-const fetchBoardName = async (id: string | Array<string> | undefined): Promise<string> => {
+const fetchBoardData = async (id: string | Array<string> | undefined): Promise<BoardData> => {
     try {
         const response = await axios.get(`/api/board/${id}`);
-        return response.data.title;
+        const data = response.data;
+        return {
+            id: data.id,
+            title: data.title,
+            tasks: await fetchTasks(id)
+        };
     } catch (error) {
         console.log(error);
-        throw new Error("Failed to fetch board name");
+        throw new Error("Failed to fetch board data");
     }
 };
 
 const BoardPage = () => {
     const [statuses, setStatuses] = useState<string[]>([]);
-    const [cards, setCards] = useState<TaskData[]>([]);
-    const [name, setName] = useState<string>('');
+    const [board, setBoard] = useState<BoardData | null>(null);
     const params = useParams();
     const id = params.id;
 
     useEffect(() => {
         fetchStatuses(id).then(setStatuses).catch(console.error);
-        fetchTasks(id).then(setCards).catch(console.error);
-        fetchBoardName(id).then(setName).catch(console.error);
+        fetchBoardData(id).then(setBoard).catch(console.error);
     }, [id]);
+
+    if (!board) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div className="p-4">
-            <Board id={id} name={name} statuses={statuses} tasks={cards} />
+            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks} />
         </div>
     );
 };
