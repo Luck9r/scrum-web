@@ -3,16 +3,18 @@ import React, { useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import Link from 'next/link';
 import withRole from "@/components/withRole";
+import { TaskData } from "@/interfaces/TaskData";
+import { BoardData } from "@/interfaces/BoardData";
 
 const ManagementPanel = () => {
-    const [boards, setBoards] = useState([]);
-    const [tasks, setTasks] = useState([]);
+    const [boards, setBoards] = useState<BoardData[]>([]);
+    const [tasks, setTasks] = useState<TaskData[]>([]);
     const [users, setUsers] = useState([]);
     const [newBoardName, setNewBoardName] = useState('');
     const [newTaskName, setNewTaskName] = useState('');
-    const [selectedBoard, setSelectedBoard] = useState(null);
-    const [selectedTask, setSelectedTask] = useState(null);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
+    const [selectedTask, setSelectedTask] = useState<string | null>(null);
+    const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
     const fetchBoards = async () => {
         try {
@@ -51,7 +53,7 @@ const ManagementPanel = () => {
         }
     };
 
-    const removeBoard = async (board_id) => {
+    const removeBoard = async (board_id: string) => {
         try {
             await axios.delete(`/api/board/${board_id}`);
             setBoards(boards.filter(board => board.id !== board_id));
@@ -70,7 +72,7 @@ const ManagementPanel = () => {
         }
     };
 
-    const removeTask = async (taskId) => {
+    const removeTask = async (taskId: string) => {
         try {
             await axios.delete(`/api/task/${taskId}`);
             setTasks(tasks.filter(task => task.id !== taskId));
@@ -112,9 +114,9 @@ const ManagementPanel = () => {
     };
 
     useEffect(() => {
-        fetchBoards();
-        fetchTasks();
-        fetchUsers();
+        void fetchBoards();
+        void fetchTasks();
+        void fetchUsers();
     }, []);
 
     return (
@@ -158,7 +160,7 @@ const ManagementPanel = () => {
                     className="input input-bordered mb-2"
                 />
                 <button onClick={addTask} className="btn btn-primary mb-4">Add Task</button>
-                {tasks.map((task, index) => (
+                {tasks.map((task: TaskData, index) => (
                     <div key={task.id} className="collapse collapse-arrow bg-base-200">
                         <input type="radio" name="tasks-accordion" defaultChecked={index === 0} />
                         <div className="collapse-title text-xl font-medium">{task.title}</div>
@@ -178,13 +180,13 @@ const ManagementPanel = () => {
                 </select>
                 <select onChange={(e) => setSelectedTask(e.target.value)} className="select select-bordered mb-2">
                     <option value="">Select Task</option>
-                    {tasks.map((task) => (
+                    {tasks.map((task: TaskData) => (
                         <option key={task.id} value={task.id}>{task.title}</option>
                     ))}
                 </select>
                 <select onChange={(e) => setSelectedUser(e.target.value)} className="select select-bordered mb-2">
                     <option value="">Select User</option>
-                    {users.map((user) => (
+                    {users.map((user: any) => (
                         <option key={user.id} value={user.id}>{user.name}</option>
                     ))}
                 </select>

@@ -3,16 +3,16 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/auth';
 import axios from '@/lib/axios';
+import { BoardData } from '@/interfaces/BoardData';
 
 const Dashboard = () => {
     const { user } = useAuth({ middleware: 'auth' });
-    const [boards, setBoards] = useState([]);
+    const [boards, setBoards] = useState<BoardData[]>([]);
 
     const fetchBoards = async () => {
         try {
             const response = await axios.get('/api/boards');
             if (Array.isArray(response.data)) {
-
                 setBoards(response.data);
             } else {
                 console.error('Error: Expected an array of boards');
