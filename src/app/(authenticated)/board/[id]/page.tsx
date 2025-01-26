@@ -8,10 +8,13 @@ import { BoardData } from "@/interfaces/BoardData";
 import { useParams } from "next/navigation";
 import {BsFilter} from "react-icons/bs";
 
-const fetchStatuses = async (id: string | Array<string> | undefined): Promise<string[]> => {
+const fetchStatuses = async (id: string | Array<string> | undefined): Promise<{ id: string, name: string }[]> => {
     try {
         const response = await axios.get(`/api/board/${id}/statuses`);
-        return response.data.map((status: { name: string; }) => status.name);
+        return response.data.map((status: { id: string, name: string }) => ({
+            id: status.id,
+            name: status.name
+        }));
     } catch (error) {
         console.log(error);
         throw new Error("Failed to fetch statuses");
@@ -28,6 +31,7 @@ const fetchTasks = async (id: string | Array<string> | undefined): Promise<TaskD
             content: task.content,
             priority: task.priority,
             status: task.status,
+            statusId: task.status_id,
             dueDate: task.due_date,
             boardId: task.board_id,
             assigneeName: task.assignee_name,
@@ -54,7 +58,7 @@ const fetchBoardData = async (id: string | Array<string> | undefined): Promise<B
 };
 
 const BoardPage = () => {
-    const [statuses, setStatuses] = useState<string[]>([]);
+    const [statuses, setStatuses] = useState<{ id: string, name: string }[]>([]);
     const [board, setBoard] = useState<BoardData | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const params = useParams();

@@ -16,7 +16,7 @@ const Sidenav = ({user, logout}: SidenavProps) => {
     return (
         <aside className="fixed top-0 left-0 h-full p-4 z-50 bg-base-200">
             <div className="flex justify-center items-center pb-6 pt-20">
-                <Image src="/icon.png" alt="Icon" width={120} height={120}/>
+                <Image src="/icon.png" alt="Icon" width={120} height={120} priority={true}/>
             </div>
             <h2 className="text-xl font-bold text-center pb-5">Scrum helper</h2>
             <div className="text-center pb-5">
