@@ -5,6 +5,7 @@ import Link from 'next/link';
 import withRole from "@/components/withRole";
 import { TaskData } from "@/interfaces/TaskData";
 import { BoardData } from "@/interfaces/BoardData";
+import TaskCard from "@/ui/TaskCard";
 
 const ManagementPanel = () => {
     const [boards, setBoards] = useState<BoardData[]>([]);
@@ -15,6 +16,7 @@ const ManagementPanel = () => {
     const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
     const [selectedTask, setSelectedTask] = useState<string | null>(null);
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchBoards = async () => {
         try {
@@ -113,11 +115,21 @@ const ManagementPanel = () => {
         }
     };
 
+    const filterTasks = (tasks: TaskData[], searchTerm: string): TaskData[] => {
+        return tasks.filter(task =>
+            task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            task.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            task.slug?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    };
+
     useEffect(() => {
         void fetchBoards();
         void fetchTasks();
         void fetchUsers();
     }, []);
+
+    const filteredTasks = filterTasks(tasks, searchTerm);
 
     return (
         <div className="container mx-auto p-4">
@@ -134,18 +146,39 @@ const ManagementPanel = () => {
                 <button onClick={addBoard} className="btn btn-primary mb-4">Add Board</button>
                 {boards.map((board, index) => (
                     <div key={board.id} className="collapse collapse-arrow bg-base-200">
-                        <input type="radio" name="boards-accordion" defaultChecked={index === 0} />
+                        <input type="radio" name="boards-accordion" defaultChecked={index === 0}/>
                         <div className="collapse-title text-xl font-medium">
                             <Link href={`/boards/${board.id}`}>{board.title}</Link>
                         </div>
                         <div className="collapse-content">
-                            <button onClick={() => removeBoard(board.id)} className="btn btn-danger ml-2">Remove</button>
+                            <button onClick={() => removeBoard(board.id)} className="btn btn-danger ml-2">Remove
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
             <div className="mb-6">
                 <h2 className="text-2xl font-semibold">Tasks</h2>
+                <label className="input input-bordered flex items-center gap-2 w-60 m-1">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search Tasks"
+                        className="grow"
+                    />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        className="h-4 w-4 opacity-70">
+                        <path
+                            fillRule="evenodd"
+                            d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                            clipRule="evenodd"/>
+                    </svg>
+                </label>
+
                 <select onChange={(e) => setSelectedBoard(e.target.value)} className="select select-bordered mb-2">
                     <option value="">Select Board</option>
                     {boards.map((board) => (
@@ -160,15 +193,21 @@ const ManagementPanel = () => {
                     className="input input-bordered mb-2"
                 />
                 <button onClick={addTask} className="btn btn-primary mb-4">Add Task</button>
-                {tasks.map((task: TaskData, index) => (
-                    <div key={task.id} className="collapse collapse-arrow bg-base-200">
-                        <input type="radio" name="tasks-accordion" defaultChecked={index === 0} />
-                        <div className="collapse-title text-xl font-medium">{task.title}</div>
-                        <div className="collapse-content">
-                            <button onClick={() => removeTask(task.id)} className="btn btn-danger ml-2">Remove</button>
-                        </div>
-                    </div>
-                ))}
+                <div className="max-h-96 overflow-y-auto max-w-min">
+                    {filteredTasks.map((task: TaskData) => (
+                        <Link href={`/task/${task.slug}`} key={task.id}>
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                            >
+                                <div className="card-actions justify-end">
+                                    <button onClick={() => removeTask(task.id)} className="btn btn-error">Remove
+                                    </button>
+                                </div>
+                            </TaskCard>
+                        </Link>
+                    ))}
+                </div>
             </div>
             <div className="mb-6">
                 <h2 className="text-2xl font-semibold">Assign Users</h2>
@@ -191,9 +230,11 @@ const ManagementPanel = () => {
                     ))}
                 </select>
                 <button onClick={assignUserToBoard} className="btn btn-primary mb-2">Assign User to Board</button>
-                <button onClick={unassignUserFromBoard} className="btn btn-secondary mb-2">Unassign User from Board</button>
+                <button onClick={unassignUserFromBoard} className="btn btn-secondary mb-2">Unassign User from Board
+                </button>
                 <button onClick={assignUserToTask} className="btn btn-primary mb-2">Assign User to Task</button>
-                <button onClick={unassignUserFromTask} className="btn btn-secondary mb-2">Unassign User from Task</button>
+                <button onClick={unassignUserFromTask} className="btn btn-secondary mb-2">Unassign User from Task
+                </button>
             </div>
         </div>
     );

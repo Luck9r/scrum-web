@@ -23,11 +23,11 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        fetchBoards().then(() => {});
+        void fetchBoards();
     }, []);
 
     return (
-        <div className="card bg-base-300 w-96 shadow-xl mt-10">
+        <div className="card bg-base-300 w-96 shadow-xl mt-10 ml-10">
             <div className="card-body">
                 <h2 className="card-title text-3xl font-semibold mb-4">Dashboard</h2>
                 <div className="mb-6">

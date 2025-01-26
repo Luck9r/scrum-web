@@ -1,5 +1,4 @@
-'use client';
-
+'use client'
 import React, { useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import Task from "@/ui/Task";
@@ -18,6 +17,7 @@ const fetchTaskData = async (slug: string | Array<string> | undefined): Promise<
             content: data.content,
             dueDate: data.due_date,
             priority: data.priority,
+            priorityId: data.priority_id,
             status: data.status,
             statusId: data.status_id,
             boardId: data.board_id,
@@ -42,9 +42,31 @@ const fetchStatuses = async (id: string): Promise<{ id: string, name: string }[]
     }
 };
 
+const fetchUsers = async (boardId: string): Promise<{ id: string, name: string }[]> => {
+    try {
+        const response = await axios.get(`/api/board/${boardId}/users`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error("Failed to fetch users");
+    }
+};
+
+const fetchPriorities = async (boardId: string): Promise<{ id: string, name: string }[]> => {
+    try {
+        const response = await axios.get(`/api/board/${boardId}/priorities`);
+        return response.data;
+    } catch (error) {
+        console.log(error);
+        throw new Error("Failed to fetch priorities");
+    }
+};
+
 const TaskPage = () => {
     const [task, setTask] = useState<TaskData | null>(null);
     const [statuses, setStatuses] = useState<{ id: string, name: string }[]>([]);
+    const [users, setUsers] = useState<{ id: string, name: string }[]>([]);
+    const [priorities, setPriorities] = useState<{ id: string, name: string }[]>([]);
     const params = useParams();
 
     useEffect(() => {
@@ -54,6 +76,8 @@ const TaskPage = () => {
     useEffect(() => {
         if (task) {
             fetchStatuses(task.boardId).then(setStatuses).catch(console.error);
+            fetchUsers(task.boardId).then(setUsers).catch(console.error);
+            fetchPriorities(task.boardId).then(setPriorities).catch(console.error);
         }
     }, [task]);
 
@@ -62,11 +86,13 @@ const TaskPage = () => {
     }
 
     return (
-        <div className="flex flex-col justify-center items-center min-h-full w-full space-y-4">
+        <div className="flex flex-col justify-center items-center  w-full space-y-4">
             <Link className="btn btn-primary" href={"/boards/" + task.boardId}>Go to Board</Link>
             <Task
                 task={task}
                 statuses={statuses}
+                users={users}
+                priorities={priorities}
             />
         </div>
     );

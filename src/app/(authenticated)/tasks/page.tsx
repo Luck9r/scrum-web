@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from 'react';
 import axios from '@/lib/axios';
-import Card from "@/ui/Card";
+import TaskCard from "@/ui/TaskCard";
 import {TaskData} from "@/interfaces/TaskData";
 import Link from "next/link";
 
@@ -71,7 +71,7 @@ const TasksPage = () => {
                         <div className="items-center">
                             {tasks.map((task) => (
                                 <Link key={task.slug} href={"/task/" + task.slug}>
-                                    <Card
+                                    <TaskCard
                                         key={task.slug}
                                         task={task}
                                     />

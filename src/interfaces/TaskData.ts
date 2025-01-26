@@ -5,6 +5,7 @@ export interface TaskData {
     content: string;
     dueDate?: string;
     priority?: string;
+    priorityId?: string;
     status: string;
     statusId: string;
     boardId: string;

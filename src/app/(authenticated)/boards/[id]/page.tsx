@@ -25,9 +25,11 @@ const fetchTasks = async (id: string | Array<string> | undefined): Promise<TaskD
             slug: task.slug,
             title: task.title,
             content: task.content,
+            priority: task.priority,
             status: task.status,
             dueDate: task.due_date,
-            boardId: task.board_id
+            boardId: task.board_id,
+            assigneeName: task.assignee_name,
         }));
     } catch (error) {
         console.log(error);
@@ -66,8 +68,8 @@ const BoardPage = () => {
     }
 
     return (
-        <div className="p-4">
-            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks} />
+        <div className="">
+            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks}/>
         </div>
     );
 };

@@ -9,7 +9,9 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
     return (
         <div className="flex">
             <Sidenav user={user} logout={logout} />
-            {children}
+            <div className="ml-56 w-full  overflow-y-auto">
+                {children}
+            </div>
         </div>
     )
 }
