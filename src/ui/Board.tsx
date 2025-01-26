@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import TaskCard from "@/ui/TaskCard";
 import { TaskData } from "@/interfaces/TaskData";
 import Link from "next/link";
-import {BsCheckLg, BsFillPencilFill} from "react-icons/bs";
+import { BsCheckLg, BsFillPencilFill } from "react-icons/bs";
+import { useAuth } from '@/hooks/auth';
 
 interface BoardProps {
     id: string | Array<string> | undefined;
@@ -12,9 +13,13 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ statuses, tasks, name }) => {
+    const { user } = useAuth({ middleware: 'auth' });
     const [editMode, setEditMode] = useState(false);
     const [boardName, setBoardName] = useState(name);
     const [boardStatuses, setBoardStatuses] = useState(statuses);
+
+    const allowedRoles = ['admin', 'product_owner', 'scrum_master'];
+    const canEdit = user && user.roles.some((role: { name: string }) => allowedRoles.includes(role.name));
 
     const handleEditToggle = () => {
         setEditMode(!editMode);
@@ -34,8 +39,6 @@ const Board: React.FC<BoardProps> = ({ statuses, tasks, name }) => {
         setBoardStatuses([...boardStatuses, ""]);
     };
 
-
-
     return (
         <>
             <div className="flex p-4">
@@ -49,9 +52,11 @@ const Board: React.FC<BoardProps> = ({ statuses, tasks, name }) => {
                 ) : (
                     <h1 className="text-4xl text-primary pb-5">{boardName}</h1>
                 )}
-                <div onClick={handleEditToggle} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
-                    {editMode ? <BsCheckLg /> : <BsFillPencilFill />}
-                </div>
+                {canEdit && (
+                    <div onClick={handleEditToggle} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
+                        {editMode ? <BsCheckLg /> : <BsFillPencilFill />}
+                    </div>
+                )}
             </div>
             <div className="flex space-x-4 pl-4">
                 {boardStatuses.map((status, index) => (
@@ -76,8 +81,8 @@ const Board: React.FC<BoardProps> = ({ statuses, tasks, name }) => {
                                                 <Link key={task.slug} href={"/task/" + task.slug}>
                                                     <TaskCard task={task}>
                                                         <div className="flex flex-row space-x-2">
-                                                        {task.assigneeName && <div className="badge badge-accent">{task.assigneeName}</div>}
-                                                        {task.priority && <div className="badge badge-primary">{task.priority}</div>}
+                                                            {task.assigneeName && <div className="badge badge-accent">{task.assigneeName}</div>}
+                                                            {task.priority && <div className="badge badge-primary">{task.priority}</div>}
                                                         </div>
                                                     </TaskCard>
                                                 </Link>
@@ -87,7 +92,7 @@ const Board: React.FC<BoardProps> = ({ statuses, tasks, name }) => {
                         </div>
                     </div>
                 ))}
-                {editMode && (
+                {editMode && canEdit && (
                     <button onClick={addStatus} className="btn btn-primary">
                         +
                     </button>

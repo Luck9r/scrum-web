@@ -5,6 +5,7 @@ import axios from '@/lib/axios';
 import TaskCard from "@/ui/TaskCard";
 import {TaskData} from "@/interfaces/TaskData";
 import Link from "next/link";
+import {BsFilter} from "react-icons/bs";
 
 const fetchTasks = async (): Promise<TaskData[]> => {
     try {
@@ -33,6 +34,7 @@ const fetchTasks = async (): Promise<TaskData[]> => {
 const TasksPage = () => {
     const [tasks, setTasks] = useState<TaskData[]>([]);
     const [boardTitles, setBoardTitles] = useState<Record<string, string>>({});
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     useEffect(() => {
         fetchTasks().then(setTasks).catch(console.error);
@@ -54,7 +56,13 @@ const TasksPage = () => {
         });
     }, [tasks]);
 
-    const groupedTasks = tasks.reduce((groupedTasks, task) => {
+    const filteredTasks = tasks.filter(task =>
+        task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.slug?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const groupedTasks = filteredTasks.reduce((groupedTasks, task) => {
         if (!groupedTasks[task.boardId]) {
             groupedTasks[task.boardId] = [];
         }
@@ -63,24 +71,36 @@ const TasksPage = () => {
     }, {} as Record<string, TaskData[]>);
 
     return (
-        <div className="flex space-x-4 p-4">
-            {Object.entries(groupedTasks).map(([boardId, tasks]) => (
-                <div key={boardId} className="card bg-base-300">
-                    <div className="card-body">
-                        <h2 className="card-title text-base-content">{boardTitles[boardId] || `Board ${boardId}`}</h2>
-                        <div className="items-center">
-                            {tasks.map((task) => (
-                                <Link key={task.slug} href={"/task/" + task.slug}>
-                                    <TaskCard
-                                        key={task.slug}
-                                        task={task}
-                                    />
-                                </Link>
-                            ))}
+        <div className="p-4">
+            <label className="input input-bordered flex items-center gap-2 w-60 mb-4">
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Filter Tasks"
+                    className="grow"
+                />
+                <BsFilter/>
+            </label>
+            <div className="flex space-x-4">
+                {Object.entries(groupedTasks).map(([boardId, tasks]) => (
+                    <div key={boardId} className="card bg-base-300">
+                        <div className="card-body">
+                            <Link href={`/board/${boardId}`}><h2 className="card-title text-base-content">{boardTitles[boardId] || `Board ${boardId}`}</h2></Link>
+                            <div className="items-center">
+                                {tasks.map((task) => (
+                                    <Link key={task.slug} href={"/task/" + task.slug}>
+                                        <TaskCard
+                                            key={task.slug}
+                                            task={task}
+                                        />
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };

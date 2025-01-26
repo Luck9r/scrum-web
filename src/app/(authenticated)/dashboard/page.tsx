@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/auth';
 import axios from '@/lib/axios';
 import { BoardData } from '@/interfaces/BoardData';
+import BoardCard from "@/ui/BoardCard";
 
 const Dashboard = () => {
     const { user } = useAuth({ middleware: 'auth' });
@@ -15,10 +16,10 @@ const Dashboard = () => {
             if (Array.isArray(response.data)) {
                 setBoards(response.data);
             } else {
-                console.error('Error: Expected an array of boards');
+                console.error('Error: Expected an array of board');
             }
         } catch (error) {
-            console.error('Error fetching boards:', error);
+            console.error('Error fetching board:', error);
         }
     };
 
@@ -27,7 +28,7 @@ const Dashboard = () => {
     }, []);
 
     return (
-        <div className="card bg-base-300 w-96 shadow-xl mt-10 ml-10">
+        <div className="card bg-base-300 max-w-min shadow-xl mt-10 ml-10">
             <div className="card-body">
                 <h2 className="card-title text-3xl font-semibold mb-4">Dashboard</h2>
                 <div className="mb-6">
@@ -45,15 +46,9 @@ const Dashboard = () => {
                 </div>
                 <div>
                     <h3 className="text-2xl font-semibold mb-2">Boards</h3>
-                    <ul className="list-disc list-inside">
                         {boards.map((board) => (
-                            <li key={board.id}>
-                                <Link href={`/boards/${board.id}`} className="text-primary">
-                                    {board.title}
-                                </Link>
-                            </li>
+                            <BoardCard board={board} key={board.id} />
                         ))}
-                    </ul>
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ import Board from "@/ui/Board";
 import { TaskData } from "@/interfaces/TaskData";
 import { BoardData } from "@/interfaces/BoardData";
 import { useParams } from "next/navigation";
+import {BsFilter} from "react-icons/bs";
 
 const fetchStatuses = async (id: string | Array<string> | undefined): Promise<string[]> => {
     try {
@@ -55,6 +56,7 @@ const fetchBoardData = async (id: string | Array<string> | undefined): Promise<B
 const BoardPage = () => {
     const [statuses, setStatuses] = useState<string[]>([]);
     const [board, setBoard] = useState<BoardData | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const params = useParams();
     const id = params.id;
 
@@ -67,9 +69,25 @@ const BoardPage = () => {
         return <div>Loading...</div>;
     }
 
+    const filteredTasks = (board.tasks || []).filter(task =>
+        task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.slug?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        task.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="">
-            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks}/>
+            <label className="input input-bordered flex items-center gap-2 w-60 m-4">
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Filter Tasks"
+                    className="grow"
+                />
+                <BsFilter />
+            </label>
+            <Board id={board.id} name={board.title} statuses={statuses} tasks={filteredTasks}/>
         </div>
     );
 };

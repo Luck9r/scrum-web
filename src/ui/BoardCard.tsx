@@ -11,16 +11,18 @@ const BoardCard: React.FC<BoardCardProps> = ({ board, children }) => {
     const { id, title } = board;
 
     return (
-        <div className="card card-compact bg-primary text-primary-content w-96 shadow-xl my-3">
-            <div className="card-body m-3">
-                <h2 className="card-title">
-                    <Link href={`/boards/${id}`}>
-                        <a className="font-bold">{title}</a>
-                    </Link>
-                </h2>
-                {children}
+        <Link href={`/board/${id}`}>
+            <div className="card card-compact bg-primary text-primary-content w-96 shadow-xl my-3">
+                <div className="card-body m-3">
+                    <h2 className="card-title">
+
+                            <div className="font-bold">{title}</div>
+
+                    </h2>
+                    {children}
+                </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

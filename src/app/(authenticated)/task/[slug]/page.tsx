@@ -87,7 +87,7 @@ const TaskPage = () => {
 
     return (
         <div className="flex flex-col justify-center items-center  w-full space-y-4">
-            <Link className="btn btn-primary" href={"/boards/" + task.boardId}>Go to Board</Link>
+            <Link className="btn btn-primary" href={"/board/" + task.boardId}>Go to Board</Link>
             <Task
                 task={task}
                 statuses={statuses}

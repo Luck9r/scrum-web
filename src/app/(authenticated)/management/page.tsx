@@ -23,7 +23,7 @@ const ManagementPanel = () => {
             const response = await axios.get('/api/board');
             setBoards(response.data);
         } catch (error) {
-            console.error('Error fetching boards:', error);
+            console.error('Error fetching board:', error);
         }
     };
 
@@ -148,7 +148,7 @@ const ManagementPanel = () => {
                     <div key={board.id} className="collapse collapse-arrow bg-base-200">
                         <input type="radio" name="boards-accordion" defaultChecked={index === 0}/>
                         <div className="collapse-title text-xl font-medium">
-                            <Link href={`/boards/${board.id}`}>{board.title}</Link>
+                            <Link href={`/board/${board.id}`}>{board.title}</Link>
                         </div>
                         <div className="collapse-content">
                             <button onClick={() => removeBoard(board.id)} className="btn btn-danger ml-2">Remove
