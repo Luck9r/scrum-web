@@ -6,14 +6,14 @@ import Board from "@/ui/Board";
 import { TaskData } from "@/interfaces/TaskData";
 import { BoardData } from "@/interfaces/BoardData";
 import { useParams } from "next/navigation";
-import {BsFilter} from "react-icons/bs";
+import { BsFilter } from "react-icons/bs";
 
 const fetchStatuses = async (id: string | Array<string> | undefined): Promise<{ id: string, name: string }[]> => {
     try {
         const response = await axios.get(`/api/board/${id}/statuses`);
         return response.data.map((status: { id: string, name: string }) => ({
             id: status.id,
-            name: status.name
+            name: status.name,
         }));
     } catch (error) {
         console.log(error);
@@ -73,12 +73,6 @@ const BoardPage = () => {
         return <div>Loading...</div>;
     }
 
-    const filteredTasks = (board.tasks || []).filter(task =>
-        task.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.slug?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        task.content?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
         <div className="">
             <label className="input input-bordered flex items-center gap-2 w-60 m-4">
@@ -91,7 +85,7 @@ const BoardPage = () => {
                 />
                 <BsFilter />
             </label>
-            <Board id={board.id} name={board.title} statuses={statuses} tasks={filteredTasks}/>
+            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks} searchTerm={searchTerm} />
         </div>
     );
 };
