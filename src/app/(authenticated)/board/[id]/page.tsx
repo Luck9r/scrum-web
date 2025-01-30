@@ -61,6 +61,7 @@ const BoardPage = () => {
     const [statuses, setStatuses] = useState<{ id: string, name: string }[]>([]);
     const [board, setBoard] = useState<BoardData | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [editMode, setEditMode] = useState<boolean>(false);
     const params = useParams();
     const id = params.id;
 
@@ -75,17 +76,20 @@ const BoardPage = () => {
 
     return (
         <div className="">
-            <label className="input input-bordered flex items-center gap-2 w-60 m-4">
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Filter Tasks"
-                    className="grow"
-                />
-                <BsFilter />
-            </label>
-            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks} searchTerm={searchTerm} />
+            {!editMode && (
+                <label className="input input-bordered flex items-center gap-2 w-60 m-4">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Filter Tasks"
+                        className="grow"
+                    />
+                    <BsFilter />
+                </label>
+            )}
+            {editMode && <div className="h-20"> </div>}
+            <Board id={board.id} name={board.title} statuses={statuses} tasks={board.tasks} searchTerm={searchTerm} editMode={editMode} setEditMode={setEditMode} />
         </div>
     );
 };

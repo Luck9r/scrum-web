@@ -10,7 +10,11 @@ import {
     SortableContext,
 } from "@dnd-kit/sortable";
 import SortableItem from "@/ui/SortableItem";
-import { BsCheckLg, BsFillPencilFill, BsTrash } from "react-icons/bs";
+import {
+    BsCheckLg, BsFileEarmarkPlusFill,
+    BsFillPencilFill,
+    BsTrash
+} from "react-icons/bs";
 import axios from "@/lib/axios";
 import Draggable from "@/ui/Draggable";
 import Droppable from "@/ui/Droppable";
@@ -20,12 +24,13 @@ interface BoardProps {
     statuses: { id: string, name: string }[];
     tasks: TaskData[] | undefined;
     searchTerm: string | undefined;
+    editMode: boolean;
+    setEditMode: (editMode: boolean) => void;
     name: string;
 }
 
-const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm }) => {
+const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, editMode, setEditMode }) => {
     const { user } = useAuth({ middleware: 'auth' });
-    const [editMode, setEditMode] = useState(false);
     const [boardName, setBoardName] = useState(name);
     const [editedBoardName, setEditedBoardName] = useState(name);
     const [boardStatuses, setBoardStatuses] = useState(statuses);
@@ -151,6 +156,28 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm }) 
         }
     };
 
+    const addTask = async () => {
+        try {
+            const response = await axios.post(`/api/boards/${id}/tasks`, { title: "New Task", status_id: boardStatuses[0].id });
+            const newTask: TaskData = {
+                id: response.data.id,
+                slug: response.data.slug,
+                title: response.data.title,
+                priority: response.data.priority_name,
+                status: response.data.status_id,
+                statusId: response.data.status_id,
+                boardId: response.data.board_id,
+                creatorId: response.data.creator_id,
+                creatorName: response.data.creator_name,
+                assigneeName: response.data.assignee_name,
+                content: response.data.content,
+            };
+            setBoardTasks([...boardTasks, newTask]);
+        } catch (error) {
+            console.error('Failed to add task:', error);
+        }
+    };
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -185,9 +212,14 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm }) 
                     <h1 className="text-4xl text-primary pb-5">{boardName}</h1>
                 )}
                 {canEdit && (
-                    <div onClick={editMode ? handleBoardNameSave : handleEditToggle} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
-                        {editMode ? <BsCheckLg /> : <BsFillPencilFill />}
-                    </div>
+                    <>
+                        <div onClick={editMode ? handleBoardNameSave : handleEditToggle} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
+                            {editMode ? <BsCheckLg /> : <BsFillPencilFill />}
+                        </div>
+                        <div onClick={addTask} className="btn btn-primary ml-3">
+                            New Task <BsFileEarmarkPlusFill className="text-xl" />
+                        </div>
+                    </>
                 )}
             </div>
             {editMode ? (
@@ -223,7 +255,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm }) 
                 <div className="flex space-x-4 pl-4">
                     {boardStatuses.map((status) => (
                         <Droppable key={status.id} id={status.id} statusId={status.id}>
-                            <div className="card bg-base-300 min-w-60">
+                            <div className="card bg-base-300 min-w-96">
                                 <div className="card-body">
                                     <h2 className="card-title text-base-content">{status.name}</h2>
                                     <div className="items-center">
