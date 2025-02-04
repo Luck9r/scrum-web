@@ -2,7 +2,7 @@ export interface TaskData {
     id: string;
     slug: string;
     title: string;
-    content: string;
+    content?: string;
     dueDate?: string;
     priority?: string;
     priorityId?: string;

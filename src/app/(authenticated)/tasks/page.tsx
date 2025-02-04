@@ -70,6 +70,26 @@ const TasksPage = () => {
         return groupedTasks;
     }, {} as Record<string, TaskData[]>);
 
+    const addTask = async (boardId: string) => {
+        try {
+            const response = await axios.post(`/api/board/${boardId}/tasks`, { title: "New Task"});
+            const newTask: TaskData = {
+                creatorId: response.data.creator_id,
+                creatorName: response.data.creator_name,
+                id: response.data.id,
+                slug: response.data.slug,
+                title: response.data.title,
+                priority: response.data.priority_name,
+                status: response.data.status_id,
+                statusId: response.data.status_id,
+                boardId: response.data.board_id,
+            };
+            setTasks([ newTask, ...tasks]);
+        } catch (error) {
+            console.error('Failed to add task:', error);
+        }
+    };
+
     return (
         <div className="p-4">
             <label className="input input-bordered flex items-center gap-2 w-60 mb-4">
@@ -86,7 +106,12 @@ const TasksPage = () => {
                 {Object.entries(groupedTasks).map(([boardId, tasks]) => (
                     <div key={boardId} className="card bg-base-300">
                         <div className="card-body">
-                            <Link href={`/board/${boardId}`}><h2 className="card-title text-base-content">{boardTitles[boardId] || `Board ${boardId}`}</h2></Link>
+                            <div className="flex justify-between items-center">
+                                <Link href={`/board/${boardId}`}>
+                                    <h2 className="card-title text-base-content w-64 line-clamp-2 overflow-ellipsis">{boardTitles[boardId] || `Board ${boardId}`}</h2>
+                                </Link>
+                                <button onClick={() => addTask(boardId)} className="btn btn-primary ml-2">New Task</button>
+                            </div>
                             <div className="items-center">
                                 {tasks.map((task) => (
                                     <Link key={task.slug} href={"/task/" + task.slug}>

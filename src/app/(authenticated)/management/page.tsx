@@ -6,17 +6,19 @@ import withRole from "@/components/withRole";
 import { TaskData } from "@/interfaces/TaskData";
 import { BoardData } from "@/interfaces/BoardData";
 import TaskCard from "@/ui/TaskCard";
+import BoardCard from "@/ui/BoardCard";
+import {UserData} from "@/interfaces/UserData";
+import UserCard from "@/ui/UserCard";
 
 const ManagementPanel = () => {
     const [boards, setBoards] = useState<BoardData[]>([]);
     const [tasks, setTasks] = useState<TaskData[]>([]);
     const [users, setUsers] = useState([]);
     const [newBoardName, setNewBoardName] = useState('');
-    const [newTaskName, setNewTaskName] = useState('');
     const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
-    const [selectedTask, setSelectedTask] = useState<string | null>(null);
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+
 
     const fetchBoards = async () => {
         try {
@@ -36,13 +38,11 @@ const ManagementPanel = () => {
         }
     };
 
-    const fetchUsers = async () => {
-        try {
-            const response = await axios.get('/api/users');
-            setUsers(response.data);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
+    const filterUsers = (users: UserData[], searchTerm: string): UserData[] => {
+        return users.filter(user =>
+            user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     };
 
     const addBoard = async () => {
@@ -64,15 +64,6 @@ const ManagementPanel = () => {
         }
     };
 
-    const addTask = async () => {
-        try {
-            const response = await axios.post('/api/task', { title: newTaskName, board_id: selectedBoard });
-            setTasks([...tasks, response.data]);
-            setNewTaskName('');
-        } catch (error) {
-            console.error('Error adding task:', error);
-        }
-    };
 
     const removeTask = async (taskId: string) => {
         try {
@@ -83,35 +74,39 @@ const ManagementPanel = () => {
         }
     };
 
-    const assignUserToBoard = async () => {
+    const fetchUsers = async () => {
         try {
-            await axios.post(`/api/board/${selectedBoard}/assign-user`, { user_id: selectedUser });
+            const response = await axios.get('/api/users');
+            setUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
+
+    const assignUserToBoard = async (userId: number) => {
+        try {
+            if (selectedBoard) {
+                await axios.post(`/api/board/${selectedBoard}/assign-user`, { user_id: userId });
+                console.log(`User ${userId} assigned to board ${selectedBoard}`);
+            } else {
+                console.warn("No board selected for user assignment.");
+            }
         } catch (error) {
             console.error('Error assigning user to board:', error);
         }
     };
 
-    const unassignUserFromBoard = async () => {
+    const unassignUserFromBoard = async (userId: number) => {
         try {
-            await axios.post(`/api/board/${selectedBoard}/unassign-user`, { user_id: selectedUser });
+            if (selectedBoard) {
+                await axios.post(`/api/board/${selectedBoard}/unassign-user`, { user_id: userId });
+                console.log(`User ${userId} unassigned from board ${selectedBoard}`);
+            } else {
+                console.warn("No board selected for user unassignment.");
+            }
         } catch (error) {
             console.error('Error unassigning user from board:', error);
-        }
-    };
-
-    const assignUserToTask = async () => {
-        try {
-            await axios.post(`/api/task/${selectedTask}/assign-user`, { user_id: selectedUser });
-        } catch (error) {
-            console.error('Error assigning user to task:', error);
-        }
-    };
-
-    const unassignUserFromTask = async () => {
-        try {
-            await axios.post(`/api/task/${selectedTask}/unassign-user`, { user_id: selectedUser });
-        } catch (error) {
-            console.error('Error unassigning user from task:', error);
         }
     };
 
@@ -123,6 +118,15 @@ const ManagementPanel = () => {
         );
     };
 
+    const removeUser = async (userId: number) => {
+        try {
+            await axios.delete(`/api/user/${userId}`);
+            setUsers(users.filter((user: UserData) => user.id !== userId));
+        } catch (error) {
+            console.error('Error removing user:', error);
+        }
+    }
+
     useEffect(() => {
         void fetchBoards();
         void fetchTasks();
@@ -130,12 +134,17 @@ const ManagementPanel = () => {
     }, []);
 
     const filteredTasks = filterTasks(tasks, searchTerm);
+    const filteredUsers = filterUsers(users, userSearchTerm);
 
-    return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-semibold mb-4">Management Panel</h1>
-            <div className="mb-6">
-                <h2 className="text-2xl font-semibold">Boards</h2>
+
+    return (<>
+
+        <h1 className="text-3xl font-semibold mb-4 ml-10">Management Panel</h1>
+    <div className="p-4 flex flex-row justify-around">
+
+    <div className="ml-6 max-h-min">
+                <h2 className="text-2xl font-semibold m-4">Boards</h2>
+        <div className="flex flex-row justify-around">
                 <input
                     type="text"
                     value={newBoardName}
@@ -144,27 +153,31 @@ const ManagementPanel = () => {
                     className="input input-bordered mb-2"
                 />
                 <button onClick={addBoard} className="btn btn-primary mb-4">Add Board</button>
-                {boards.map((board, index) => (
-                    <div key={board.id} className="collapse collapse-arrow bg-base-200">
-                        <input type="radio" name="boards-accordion" defaultChecked={index === 0}/>
-                        <div className="collapse-title text-xl font-medium">
-                            <Link href={`/board/${board.id}`}>{board.title}</Link>
-                        </div>
-                        <div className="collapse-content">
-                            <button onClick={() => removeBoard(board.id)} className="btn btn-danger ml-2">Remove
+        </div>
+        <div className=" overflow-scroll">
+                {boards.map((board) => (
+                    <BoardCard board={board} key={board.id} >
+                        <div className="card-actions justify-end">
+                            <Link href={`/board/${board.id}`}>
+                                <button className="btn">Edit</button>
+                            </Link>
+                            <button onClick={() => removeBoard(board.id)}
+                                    className="btn btn-error">Remove
                             </button>
+
                         </div>
-                    </div>
+                    </BoardCard>
                 ))}
-            </div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-semibold">Tasks</h2>
+        </div>
+    </div>
+        <div className="ml-6 max-h-min">
+            <h2 className="text-2xl font-semibold m-4">Tasks</h2>
                 <label className="input input-bordered flex items-center gap-2 w-60 m-1">
                     <input
                         type="text"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Search Tasks"
+                        placeholder="Filter Tasks"
                         className="grow"
                     />
                     <svg
@@ -178,65 +191,72 @@ const ManagementPanel = () => {
                             clipRule="evenodd"/>
                     </svg>
                 </label>
-
-                <select onChange={(e) => setSelectedBoard(e.target.value)} className="select select-bordered mb-2">
-                    <option value="">Select Board</option>
-                    {boards.map((board) => (
-                        <option key={board.id} value={board.id}>{board.title}</option>
-                    ))}
-                </select>
-                <input
-                    type="text"
-                    value={newTaskName}
-                    onChange={(e) => setNewTaskName(e.target.value)}
-                    placeholder="New Task Name"
-                    className="input input-bordered mb-2"
-                />
-                <button onClick={addTask} className="btn btn-primary mb-4">Add Task</button>
-                <div className="max-h-96 overflow-y-auto max-w-min">
+                <div className="overflow-y-auto max-w-min">
                     {filteredTasks.map((task: TaskData) => (
-                        <Link href={`/task/${task.slug}`} key={task.id}>
                             <TaskCard
                                 key={task.id}
                                 task={task}
                             >
                                 <div className="card-actions justify-end">
+                                    <Link href={`/task/${task.slug}`} key={task.id}><button className="btn ">Edit</button></Link>
                                     <button onClick={() => removeTask(task.id)} className="btn btn-error">Remove
                                     </button>
                                 </div>
                             </TaskCard>
-                        </Link>
                     ))}
                 </div>
             </div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-semibold">Assign Users</h2>
-                <select onChange={(e) => setSelectedBoard(e.target.value)} className="select select-bordered mb-2">
-                    <option value="">Select Board</option>
-                    {boards.map((board) => (
-                        <option key={board.id} value={board.id}>{board.title}</option>
-                    ))}
-                </select>
-                <select onChange={(e) => setSelectedTask(e.target.value)} className="select select-bordered mb-2">
-                    <option value="">Select Task</option>
-                    {tasks.map((task: TaskData) => (
-                        <option key={task.id} value={task.id}>{task.title}</option>
-                    ))}
-                </select>
-                <select onChange={(e) => setSelectedUser(e.target.value)} className="select select-bordered mb-2">
-                    <option value="">Select User</option>
-                    {users.map((user: any) => (
-                        <option key={user.id} value={user.id}>{user.name}</option>
-                    ))}
-                </select>
-                <button onClick={assignUserToBoard} className="btn btn-primary mb-2">Assign User to Board</button>
-                <button onClick={unassignUserFromBoard} className="btn btn-secondary mb-2">Unassign User from Board
-                </button>
-                <button onClick={assignUserToTask} className="btn btn-primary mb-2">Assign User to Task</button>
-                <button onClick={unassignUserFromTask} className="btn btn-secondary mb-2">Unassign User from Task
-                </button>
+        <div className="ml-6 max-h-min">
+            <h2 className="text-2xl font-semibold m-4">Users</h2>
+            <label className="input input-bordered flex items-center gap-2 w-60 m-1">
+                <input
+                    type="text"
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    placeholder="Filter Users"
+                    className="grow"
+                />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    className="h-4 w-4 opacity-70">
+                    <path
+                        fillRule="evenodd"
+                        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                        clipRule="evenodd"/>
+                </svg>
+            </label>
+            <div className="overflow-y-auto max-w-min"> {/* Added max-h and overflow */}
+                {filteredUsers.map((user: UserData) => (
+                    <UserCard user={user} key={user.id}>
+                        <div className="">
+                            <div className="flex flex-row justify-between">
+                            <select onChange={(e) => setSelectedBoard(e.target.value)}
+                                    className="select select-bordered w-32 mr-2">
+                                <option value="">Select Board</option>
+                                {boards.map((board) => (
+                                    <option key={board.id} value={board.id}>{board.title}</option>
+                                ))}
+                            </select>
+                            <button onClick={() => assignUserToBoard(user.id)} className="btn btn-primary mr-2">Assign
+                            </button>
+                            <button onClick={() => unassignUserFromBoard(user.id)}
+                                    className="btn btn-secondary mr-2">Unassign
+                            </button>
+                        </div>
+                            <div className="flex flex-row justify-end mr-2 ">
+                                <Link href={`/user/${user.id}`}><button className="btn mt-2">Edit</button></Link>
+                                <button className="btn btn-error mt-2 ml-2" onClick={() => removeUser(user.id)}>Remove</button>
+                            </div>
+                        </div>
+
+                    </UserCard>
+                ))}
             </div>
         </div>
+    </div>
+        </>
     );
 };
 

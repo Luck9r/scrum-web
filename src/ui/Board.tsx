@@ -11,6 +11,7 @@ import {
 } from "@dnd-kit/sortable";
 import SortableItem from "@/ui/SortableItem";
 import {
+    BsCalendar3,
     BsCheckLg, BsFileEarmarkPlusFill,
     BsFillPencilFill,
     BsTrash
@@ -62,7 +63,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
 
     const addStatus = async () => {
         try {
-            const response = await axios.post(`/api/boards/${id}/statuses`, { name: "New Status" });
+            const response = await axios.post(`/api/board/${id}/statuses`, { name: "New Status" });
             const newStatus = response.data;
             setBoardStatuses([...boardStatuses, newStatus]);
         } catch (error) {
@@ -72,7 +73,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
 
     const deleteStatus = async (statusId: string) => {
         try {
-            await axios.delete(`/api/boards/${id}/status/${statusId}`);
+            await axios.delete(`/api/board/${id}/status/${statusId}`);
             setBoardStatuses(boardStatuses.filter(status => status.id !== statusId));
         } catch (error) {
             console.error('Failed to delete status:', error);
@@ -89,7 +90,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
     const handleStatusSave = async (index: number) => {
         const status = boardStatuses[index];
         try {
-            await axios.put(`/api/boards/${id}/status/${status.id}`, { name: status.name });
+            await axios.put(`/api/board/${id}/status/${status.id}`, { name: status.name });
         } catch (error) {
             console.error('Failed to update status name:', error);
         }
@@ -117,7 +118,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
                 setBoardStatuses(newOrder);
 
                 try {
-                    await axios.put(`/api/boards/${id}/statuses/order`, {
+                    await axios.put(`/api/board/${id}/statuses/order`, {
                         statuses: newOrder.map((status, index) => ({ id: status.id, order: index }))
                     });
                 } catch (error) {
@@ -158,7 +159,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
 
     const addTask = async () => {
         try {
-            const response = await axios.post(`/api/boards/${id}/tasks`, { title: "New Task", status_id: boardStatuses[0].id });
+            const response = await axios.post(`/api/board/${id}/tasks`, { title: "New Task", status_id: boardStatuses[0].id });
             const newTask: TaskData = {
                 id: response.data.id,
                 slug: response.data.slug,
@@ -209,16 +210,24 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
                         className="input input-bordered"
                     />
                 ) : (
-                    <h1 className="text-4xl text-primary pb-5">{boardName}</h1>
+                    <h1 className="text-4xl text-primary pb-5 ">{boardName}</h1>
                 )}
                 {canEdit && (
                     <>
                         <div onClick={editMode ? handleBoardNameSave : handleEditToggle} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
                             {editMode ? <BsCheckLg /> : <BsFillPencilFill />}
                         </div>
-                        <div onClick={addTask} className="btn btn-primary ml-3">
-                            New Task <BsFileEarmarkPlusFill className="text-xl" />
-                        </div>
+                        {editMode &&
+                            (<div onClick={addTask} className="btn btn-primary ml-3">
+                            New Task <BsFileEarmarkPlusFill className="text-xl"/>
+                             </div>
+                        )}
+                        {!editMode && (
+                            <Link href={`/board/${id}/calendar`} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
+                                <BsCalendar3/>
+                            </Link>
+                        )}
+
                     </>
                 )}
             </div>

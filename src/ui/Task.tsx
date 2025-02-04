@@ -23,7 +23,7 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(dueDate ? new Date(dueDate) : null);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editedTitle, setEditedTitle] = useState<string>(title);
-    const [editedContent, setEditedContent] = useState<string>(content);
+    const [editedContent, setEditedContent] = useState<string>(content || '');
 
     const allowedRoles = ['admin', 'product_owner', 'scrum_master'];
     const canEdit = user && user.roles.some((role: { name: string }) => allowedRoles.includes(role.name));
@@ -47,7 +47,7 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
     const handleUserChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
         const newUserId: string = event.target.value;
         try {
-            await axios.put(`/api/task/${id}`, { assignee_id: newUserId });
+            await axios.put(`/api/task/${id}`, { assignee_id: newUserId === 'none' ? null : newUserId });
         } catch (error) {
             console.error("Failed to update user", error);
         }
@@ -140,13 +140,13 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                             <tr className="">
                                 <td>Status</td>
                                 <td>
-                                        <select className="badge badge-primary cursor-pointer px-1" value={currentStatus}
-                                                onChange={handleStatusChange}>
-                                            {statuses.map((status) => (
-                                                <option key={status.id}
-                                                        value={parseInt(status.id, 10)}>{status.name}</option>
-                                            ))}
-                                        </select>
+                                    <select className="badge badge-primary cursor-pointer px-1" value={currentStatus}
+                                            onChange={handleStatusChange}>
+                                        {statuses.map((status) => (
+                                            <option key={status.id}
+                                                    value={parseInt(status.id, 10)}>{status.name}</option>
+                                        ))}
+                                    </select>
                                 </td>
                             </tr>
                             <tr className="bg-base-200">
@@ -185,6 +185,7 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                                     {canEdit ? (
                                         <select className="badge badge-accent cursor-pointer px-1 max-w-24 overflow-ellipsis" value={currentUser}
                                                 onChange={handleUserChange}>
+                                            <option value="none">No one</option>
                                             {users.map((user) => (
                                                 <option key={user.id} value={user.id}>{user.name}</option>
                                             ))}

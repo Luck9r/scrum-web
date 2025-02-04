@@ -60,7 +60,9 @@ const Dashboard = () => {
                 <div>
                     <h3 className="text-2xl font-semibold mb-2">Boards</h3>
                     {boards.map((board) => (
-                        <BoardCard board={board} key={board.id} />
+                        <Link href={`/board/${board.id}`}  key={board.id}>
+                        <BoardCard board={board} />
+                        </Link>
                     ))}
                 </div>
             </div>
