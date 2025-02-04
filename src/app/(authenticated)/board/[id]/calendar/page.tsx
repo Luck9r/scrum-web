@@ -25,7 +25,7 @@ const CalendarPage: React.FC = () => {
         const fetchMeetings = async () => {
             if (startDate && endDate) {
                 try {
-                    const response = await axios.get(`/api/board/2/meetings/date-range/from/${startDate.toISOString().split('T')[0]}/to/${endDate.toISOString().split('T')[0]}`);
+                    const response = await axios.get(`/api/board/${boardId}/meetings/date-range/from/${startDate.toISOString().split('T')[0]}/to/${endDate.toISOString().split('T')[0]}`);
                     const mappedMeetings: MeetingData[] = response.data.map((meeting: any) => ({
                         id: meeting.id,
                         name: meeting.name,
