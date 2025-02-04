@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from '@/lib/axios';
 import { TaskData } from '@/interfaces/TaskData';
-import { BsFillPencilFill, BsCheckLg } from "react-icons/bs";
+import {BsFillPencilFill, BsCheckLg, BsClockHistory} from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from '@/hooks/auth';
@@ -212,8 +212,7 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                             </tr>
                             </tbody>
                         </table>
-                        <button onClick={willNotCompleteOnTime} className="btn btn-error mt-2">Will not complete on time
-                        </button>
+                        <button onClick={willNotCompleteOnTime} className="btn btn-error mt-2"><BsClockHistory/>Will not complete on time</button>
 
                     </div>
                 </div>
