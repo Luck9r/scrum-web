@@ -14,6 +14,9 @@ const UserCard: React.FC<UserCardProps> = ({ user, children }) => {
                 <h2 className="card-title">{user.name}</h2>
                 <p>{user.email}</p>
                 <p>Roles: {user.roles.join(', ')}</p>
+                {user.boards &&
+                <p>Boards: {user.boards.join(', ')}</p>
+                }
                 {children}
             </div>
         </div>

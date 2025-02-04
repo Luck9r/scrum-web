@@ -90,6 +90,16 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
         return `${year}-${month}-${day}`;
     };
 
+    const willNotCompleteOnTime = async () => {
+        try {
+            await axios.post(`/api/task/${id}/delay`);
+            alert('You have notified the team that you will not be able to complete the task on time.');
+        } catch (error) {
+            console.error('Failed to notify the team.', error);
+            alert('Failed to notify the team.');
+        }
+    };
+
     return (
         <div className="card bg-base-300 shadow-xl max-w-min">
             <div className="card-body flex-row">
@@ -131,7 +141,7 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                     )}
                 </div>
                 <div className="min-w-60 max-w-96 space-y-1 ml-10">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto flex flex-col">
                         <table className="table">
                             <tbody>
                             <tr>
@@ -153,10 +163,12 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                                 <td className="w-28">Due Date</td>
                                 <td className="flex items-center w-36">
                                     {selectedDate ? (selectedDate < new Date() ?
-                                        <span className="badge badge-error bg-red-700">{formatDate(selectedDate)}</span> :
+                                        <span
+                                            className="badge badge-error bg-red-700">{formatDate(selectedDate)}</span> :
                                         <span className="badge badge-accent">{formatDate(selectedDate)}</span>) : '-'}
                                     {canEdit && (
-                                        <BsFillPencilFill className="text-primary ml-1 cursor-pointer" onClick={() => setIsDatePickerOpen(true)} />
+                                        <BsFillPencilFill className="text-primary ml-1 cursor-pointer"
+                                                          onClick={() => setIsDatePickerOpen(true)}/>
                                     )}
                                 </td>
                             </tr>
@@ -164,7 +176,8 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                                 <td>Priority</td>
                                 <td>
                                     {canEdit ? (
-                                        <select className="badge badge-error cursor-pointer px-1" value={currentPriority}
+                                        <select className="badge badge-error cursor-pointer px-1"
+                                                value={currentPriority}
                                                 onChange={handlePriorityChange}>
                                             {priorities.map((priority) => (
                                                 <option key={priority.id} value={priority.id}>{priority.name}</option>
@@ -183,8 +196,10 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                                 <td>Assignee</td>
                                 <td>
                                     {canEdit ? (
-                                        <select className="badge badge-accent cursor-pointer px-1 max-w-24 overflow-ellipsis" value={currentUser}
-                                                onChange={handleUserChange}>
+                                        <select
+                                            className="badge badge-accent cursor-pointer px-1 max-w-24 overflow-ellipsis"
+                                            value={currentUser}
+                                            onChange={handleUserChange}>
                                             <option value="none">No one</option>
                                             {users.map((user) => (
                                                 <option key={user.id} value={user.id}>{user.name}</option>
@@ -197,6 +212,9 @@ const Task: React.FC<TaskProps> = ({ task, statuses, users, priorities }) => {
                             </tr>
                             </tbody>
                         </table>
+                        <button onClick={willNotCompleteOnTime} className="btn btn-error mt-2">Will not complete on time
+                        </button>
+
                     </div>
                 </div>
             </div>

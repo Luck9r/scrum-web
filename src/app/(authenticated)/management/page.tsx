@@ -13,7 +13,7 @@ import UserCard from "@/ui/UserCard";
 const ManagementPanel = () => {
     const [boards, setBoards] = useState<BoardData[]>([]);
     const [tasks, setTasks] = useState<TaskData[]>([]);
-    const [users, setUsers] = useState([]);
+    const [users, setUsers]= useState([]);
     const [newBoardName, setNewBoardName] = useState('');
     const [selectedBoard, setSelectedBoard] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -89,6 +89,7 @@ const ManagementPanel = () => {
             if (selectedBoard) {
                 await axios.post(`/api/board/${selectedBoard}/assign-user`, { user_id: userId });
                 console.log(`User ${userId} assigned to board ${selectedBoard}`);
+                void fetchUsers();
             } else {
                 console.warn("No board selected for user assignment.");
             }
@@ -102,6 +103,7 @@ const ManagementPanel = () => {
             if (selectedBoard) {
                 await axios.post(`/api/board/${selectedBoard}/unassign-user`, { user_id: userId });
                 console.log(`User ${userId} unassigned from board ${selectedBoard}`);
+                void fetchUsers();
             } else {
                 console.warn("No board selected for user unassignment.");
             }

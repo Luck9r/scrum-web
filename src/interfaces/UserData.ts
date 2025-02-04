@@ -4,4 +4,5 @@ export interface UserData {
     name: string;
     email: string;
     roles: string[];
+    boards?: string[];
 }
