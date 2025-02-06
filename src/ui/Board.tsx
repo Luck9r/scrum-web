@@ -210,7 +210,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
                         className="input input-bordered"
                     />
                 ) : (
-                    <h1 className="text-4xl text-primary pb-5 ">{boardName}</h1>
+                    <h1 className="text-4xl text-primary pb-5 ">{boardName}: {tasks?.length} tasks total</h1>
                 )}
                 {canEdit && (
                     <>
@@ -222,13 +222,14 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
                             New Task <BsFileEarmarkPlusFill className="text-xl"/>
                              </div>
                         )}
-                        {!editMode && (
-                            <Link href={`/board/${id}/calendar`} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
-                                <BsCalendar3/>
-                            </Link>
-                        )}
+
 
                     </>
+                )}
+                {!editMode && (
+                    <Link href={`/board/${id}/calendar`} className="cursor-pointer text-primary text-2xl ml-2 pt-2">
+                        <BsCalendar3/>
+                    </Link>
                 )}
             </div>
             {editMode ? (
@@ -266,7 +267,7 @@ const Board: React.FC<BoardProps> = ({ id, statuses, tasks, name, searchTerm, ed
                         <Droppable key={status.id} id={status.id} statusId={status.id}>
                             <div className="card bg-base-300 min-w-96">
                                 <div className="card-body">
-                                    <h2 className="card-title text-base-content">{status.name}</h2>
+                                    <h2 className="card-title text-base-content">{status.name}: {boardTasks.filter(task => task.statusId === status.id).length }</h2>
                                     <div className="items-center">
                                         {filteredTasks
                                             .filter(task => task.statusId === status.id)

@@ -6,6 +6,7 @@ import TaskCard from "@/ui/TaskCard";
 import {TaskData} from "@/interfaces/TaskData";
 import Link from "next/link";
 import {BsFilter} from "react-icons/bs";
+import { useAuth } from '@/hooks/auth';
 
 const fetchTasks = async (): Promise<TaskData[]> => {
     try {
@@ -35,6 +36,7 @@ const TasksPage = () => {
     const [tasks, setTasks] = useState<TaskData[]>([]);
     const [boardTitles, setBoardTitles] = useState<Record<string, string>>({});
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const { user } = useAuth({ middleware: 'auth' });
 
     useEffect(() => {
         fetchTasks().then(setTasks).catch(console.error);
@@ -90,6 +92,10 @@ const TasksPage = () => {
         }
     };
 
+    const allowedRoles = ['admin', 'product_owner', 'scrum_master'];
+    const canAdd = user && user.roles.some((role: { name: string }) => allowedRoles.includes(role.name));
+
+
     return (
         <div className="p-4">
             <label className="input input-bordered flex items-center gap-2 w-60 mb-4">
@@ -110,7 +116,11 @@ const TasksPage = () => {
                                 <Link href={`/board/${boardId}`}>
                                     <h2 className="card-title text-base-content w-64 line-clamp-2 overflow-ellipsis">{boardTitles[boardId] || `Board ${boardId}`}</h2>
                                 </Link>
-                                <button onClick={() => addTask(boardId)} className="btn btn-primary ml-2">New Task</button>
+                                {canAdd && (
+                                    <button onClick={() => addTask(boardId)} className="btn btn-primary ml-2">New
+                                        Task</button>
+                                )}
+
                             </div>
                             <div className="items-center">
                                 {tasks.map((task) => (
